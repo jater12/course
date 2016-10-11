@@ -49,7 +49,22 @@ public class InnerNode extends BPlusNode {
   @Override
   public LeafNode locateLeaf(DataType key, boolean findFirst) {
     //TODO: Implement Me!!
-    return null;
+    List<BEntry> list = this.getAllValidEntries();
+    int count = 0;
+      for (BEntry entry : list){
+          if(key.compareTo(entry) == 1){
+                break;
+          }else if (key.compareTo(entry) == -1){
+              count++;
+          }else{
+              if (findFirst) {
+                  break;
+              }else{
+                  continue;
+              }
+          }
+      }
+      return BPlusNode.getBPlusNode(this.getTree(), list.get(count).getPageNum()).locateLeaf(key, findFirst);
   }
 
   /**

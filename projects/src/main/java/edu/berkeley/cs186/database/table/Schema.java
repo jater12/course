@@ -4,9 +4,8 @@ import edu.berkeley.cs186.database.datatypes.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
+import java.util.*;
 /**
  * The Schema of a particular table.
  *
@@ -44,7 +43,18 @@ public class Schema {
    */
   public Record verify(List<DataType> values) throws SchemaException {
     //TODO: Implement Me!!
-    return null;
+    int [] arr = {1,4,5,4};
+    int ctr = 0;
+    if (values.size() != 4){
+      throw new SchemaException("LUL");
+    }
+    for(int len : arr){
+      if (values.get(ctr).getBytes().length != len){
+        throw new SchemaException("LUL");
+      }
+      ctr++;
+    }
+    return new Record(values);
   }
 
   /**
@@ -58,7 +68,15 @@ public class Schema {
    */
   public byte[] encode(Record record) {
     //TODO: Implement Me!!
-    return null;
+    List<DataType> values = record.getValues();
+    byte [] arr = new byte[14];
+    int ctr = 0;
+    for (DataType val :values){
+      System.arraycopy(val.getBytes(), 0, arr, ctr,val.getBytes().length);
+      ctr += val.getBytes().length;
+
+    }
+    return arr;
   }
 
   /**
@@ -69,8 +87,56 @@ public class Schema {
    * @return the decoded Record
    */
   public Record decode(byte[] input) {
+      /*
     //TODO: Implement Me!!
-    return null;
+    ByteBuffer byteBuffer = ByteBuffer.wrap(input);
+    byte [] boolByteArray  = new byte[1];
+    boolByteArray[0] = byteBuffer.get();
+    BoolDataType boolData = new BoolDataType(boolByteArray);
+
+      IntDataType intData = new IntDataType(byteBuffer.getInt());
+
+      byte [] strByteArray = new byte[input.length-9];
+    byteBuffer.get(strByteArray,0, input.length-9);
+    StringDataType strData = new StringDataType(strByteArray);
+
+      FloatDataType floatData = new FloatDataType(byteBuffer.getFloat());
+
+      List<DataType> data = new ArrayList<DataType>();
+    data.add(boolData);
+    data.add(intData);
+    data.add(strData);
+    data.add(floatData);
+    return new Record(data);
+    */
+      List<DataType> values = new ArrayList<DataType>();
+      ByteBuffer byteBuffer = ByteBuffer.wrap(input);
+      Iterator<DataType> tempft = this.getFieldTypes().iterator();
+      DataType tempdt;
+
+      while (tempft.hasNext()) {
+
+          tempdt = tempft.next();
+
+          if (tempdt.type() == DataType.Types.BOOL) {
+              byte[] temp = {byteBuffer.get()};
+              values.add(new BoolDataType(temp));
+          } else if (tempdt.type() == DataType.Types.INT) {
+              values.add(new IntDataType(byteBuffer.getInt()));
+          } else if (tempdt.type() == DataType.Types.FLOAT) {
+              values.add(new FloatDataType(byteBuffer.getFloat()));
+          } else if (tempdt.type() == DataType.Types.STRING) {
+              byte[] tempb = new byte[input.length - 9]; // input.length - 9 should get you the length of the string
+              byteBuffer.get(tempb, 0, input.length - 9); // 5 iterations 0 to 4 (exclusive on 5)
+              values.add(new StringDataType(tempb));
+          } else {
+              System.out.println("Schema.decode -- WTF NO DATA TYPE?");
+          }
+
+      }
+
+      return new Record(values);
+
   }
 
   public int getEntrySize() {
